@@ -19,10 +19,11 @@ class AppTest {
         log(Level.ERROR,this.getClass,"this is a test message3")
         log(Level.ERROR,this.getClass,"this is a test message4")
         setWriteToConsole(false)
-        addFileHandler("Console.log",Level.ERROR)
+        addFileHandler("Console.log",Level.ERROR,false)
         log(Level.ERROR,this.getClass,"this is a test message5")
         log(Level.DEBUG,this.getClass,"this is a test message5")
         assertTrue(true)
+        rollOverHandler("test.log")
 
     }
 
