@@ -7,6 +7,7 @@ import scala.io.Source
 
 /**
   * Created by SAK on 25-12-2016.
+  * Updated by SAK on 29-01-2017
   */
 object Level extends Enumeration {
   type Level = Value
@@ -28,14 +29,12 @@ object Logger {
     }
   }
   catch {
-    case ex: Exception => {
+    case ex: scala.MatchError =>
+      println("Aborting properties file load. Unrecognised values found")
+      ex.printStackTrace()
+    case ex: Exception =>
       println("Unable to load properties file. Defaulting Logger properties")
       ex.printStackTrace()
-    }
-    case ex: scala.MatchError => {
-      println("Failed to load properties file because of unrecognised values.")
-      ex.printStackTrace()
-    }
   }
 
   private def setProps(key: String, value:String):Unit = {
@@ -55,12 +54,11 @@ object Logger {
       }
     }
     key match {
-      case "AddHandler" => {
+      case "AddHandler" =>
         val values = value.split(',')
         if (values.length==3) this.addFileHandler(values{0},toLevel(values{1}),toBoolean(values{2}))
         else if (values.length==2) this.addFileHandler(values{0},toLevel(values{1}))
         else this.addFileHandler(values{0})
-      }
       case "DefaultLevel" => this.setDefaultLevel( toLevel(value))
       case "WriteToConsole" => this.setWriteToConsole(toBoolean(value))
     }
@@ -81,7 +79,7 @@ object Logger {
     }
     val messageString = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss:SSS").format(new Date()) + " - " +
                              logLevel.toString  + " \r " + identifier.toString + " - " + message + "\r"
-    if (handler.size > 0) handler.map { case (file, level) => writeToHandler(file, level, messageString) }
+    if (handler.nonEmpty) handler.map { case (file, level) => writeToHandler(file, level, messageString) }
     if (writeToConsole && logLevel>=this.level) println(message)
   }
 
@@ -97,7 +95,6 @@ object Logger {
       println("Rolling over "+fileName)
       new File(fileName).renameTo(new File(fileName+ new SimpleDateFormat(".yyyy-MM-dd-HH-mm-ss-SSS").format(new Date())))
     }
-
   }
 
   def addFileHandler(filename:String): Unit ={ handler += (filename -> this.level) }
